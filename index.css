@@ -1,0 +1,11 @@
+.operant {
+    float: left;
+    color: red;
+    margin-right: 20px;
+}
+
+#chosen > div {
+    float: left;
+    color: blue;
+    margin-right: 10px;
+}
