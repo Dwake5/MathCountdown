@@ -2,8 +2,8 @@ let highNumbers = [25, 50, 75, 100]
 let lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
 let numbers = []
 let round = 1
-let numbersToPick = 6
-let timeLeft = 60
+let numbersToPick = 2
+let timeLeft = 6000
 let calculation = []
 const operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
@@ -195,7 +195,6 @@ const fillDomNumbers = () => {
     }
 }
 
-
 // Evaluate what has been entered into the calculation
 const evaluate = () => {
         let sum = ""
@@ -241,8 +240,8 @@ const displayGoalAndTimer = () => {
 const addListenToUndoBtn = () => {
     undoBtn = document.getElementById('undo')
     undoBtn.addEventListener('click', () => {
-        console.log('Undo working')
         calculation.pop()
+        renderCurrentCalculation()
     })
 }
 
