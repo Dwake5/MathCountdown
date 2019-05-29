@@ -4,7 +4,7 @@ let numbers = [7,3,2,2,4,50]
 let round = 1
 let numbersToPick = 7
 let timeLeft = 30
-let calculation = ['*']
+let calculation = ['3', '*', '5', '*', '10', '*']
 const operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
 const clickableStationary = document.querySelectorAll('.fixed')
@@ -14,6 +14,12 @@ const chosen = document.getElementById('chosen')
 const numbHolder = document.getElementById('numbers')
 // Display the closest someone has got to the answer
 const closest = document.getElementById('closest')
+const state = 0
+const goToNextState = () => {
+    state++
+}
+
+
 // Generate a random number between 101 and 999 
 const targetNumber = () => Math.floor(Math.random() * 898) + 101 
 
@@ -38,13 +44,15 @@ const pickLow = () => {
     numbersToPick--
 }
 
-// Evaluate and display the closest number the user has got to the target
+// Evaluate and display the closest number the user has got to the target, scrapped for now
+// Use math.abs() to solve
 const evaluateClosest = () => {
-    let best = 
-
-
-
-    closest.innerText = `The closest you have got is yourAnswer`
+    let best = 0
+    let diff = goal - best 
+    if ((best - yourAnswer) < diff) {
+        best = yourAnswer
+    }
+    closest.innerText = `The closest you have got is ${best}`
 }
 
 // Start a decreasing timer, updates the DOM and stops at 0
@@ -75,9 +83,17 @@ const fillDomNumbers = () => {
     }
 }
 
-// When clicking an operant put it into the calculation function
-// const listenToOperants = () => {
+// When clicking a number, push it into the calculation function and remove from list
+// const listenToNumbers = () => {
 //     clickableOnce.forEach.addEventListener('click', () => {
+//         console.log()
+//         calculation.push(this)
+//     })
+// }
+
+// When clicking an operation put it into the calculation function
+// const listenToOperants = () => {
+//     clickableStationary.forEach(addEventListener('click', () => {
 //         console.log()
 //         calculation.push(this)
 //     })
@@ -85,22 +101,20 @@ const fillDomNumbers = () => {
 
 // Evaluate what has been entered into the calculation
 const evaluate = () => {
-    let sum = ""
-    for (let i = 0; i < calculation.length; i++) {
-       sum += calculation[i]
-    }
-    if (calculation[calculation.length-1]) {
-        yourAnswer = eval(sum)
-        if (typeof(yourAnswer) === "number") {
-            if (yourAnswer % 1 === 0) {
-                return ( `= ${yourAnswer}` )
-            } else {
-                return ' Answer must be a whole number '
-            }
-        } else {
-            return ' '
+        let sum = ""
+        for (let i = 0; i < calculation.length; i++) {
+        sum += calculation[i]
         }
-    }
+            yourAnswer = eval(sum);
+            if (typeof(yourAnswer) === "number") {
+                if (yourAnswer % 1 === 0) {
+                    return ( `= ${yourAnswer}` )
+                } else {
+                    return ' Ans`wer must be a whole number '
+                }
+            } else {
+                return ' '
+            }
 }
 
 // Render the current calculation on the page and its answer
@@ -120,20 +134,21 @@ const renderCurrentCalculation = () => {
 }
 
 
-
 const init = () => {
     displayTargetNumber()
-    evaluateClosest()
     timer()
     fillDomNumbers()
     evaluate()
-    // listenToOperants()
     renderCurrentCalculation()
+    evaluateClosest()
+    // listenToNumbers()
+    // listenToOperants()
 }
 
 init()
 
 // 1. How to get it so user cant concatinate numbers
 // 2. Sort out screen changes
-// 3. 
+// 3. How to get rounds working
+// 4. Get eval to not break when it isnt a legitimate sum // check if end is not okay
 
