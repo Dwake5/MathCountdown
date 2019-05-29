@@ -2,8 +2,8 @@ let highNumbers = [25, 50, 75, 100]
 let lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
 let numbers = []
 let round = 1
-let numbersToPick = 1
-let timeLeft = 1
+let numbersToPick = 6
+let timeLeft = 60
 let calculation = []
 const operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
@@ -16,12 +16,29 @@ const numbHolder = document.getElementById('numbers')
 const closest = document.getElementById('closest')
 let bestAnswer = 0
 let finalScore = document.getElementById('score')
+let usersAndHighscores = document.getElementById('highscores')
+
+
+// fetch 
+const getUsers = () => { 
+    return fetch ("http://localhost:3000/users")
+    .then(resp => resp.json())
+    .then(users => renderCurrentUsers(users))
+}
+
+const renderCurrentUsers = users => {
+    users.forEach(user => renderUser(user))
+}
+
+const renderUser = user => {
+    pTag = document.createElement('p')
+    pTag.innerText = `${user.name} : ${user.score}`
+    usersAndHighscores.append(pTag)
+}
 
 const addHighButtonFunctionality = () => {
     highBtn = document.getElementById('high')
     highBtn.addEventListener('click', () => {
-        // debugger
-        console.log("I ran")
         if (numbersToPick > 1) {
             pickHigh()
             numbersLeftToPick()
@@ -74,7 +91,6 @@ const pickHigh = () => {
         numbersToPick--
         if (highNumbers.length === 0) {
             console.log("here")
-            // highBtn.style.color = 'grey'
             highBtn.disabled = true
             highBtn.innerText = 'No more left'
             
@@ -137,7 +153,7 @@ const addListenerToOperants = () => {
 
 // Evaluate and display the closest number the user has got to the target
 const evaluateClosest = () => {
-    let diff = goal - bestAnswer 
+    let diff = Math.abs(goal - bestAnswer)
     if (Math.abs(goal - yourAnswer) < diff) {
         bestAnswer = yourAnswer
     }
@@ -248,6 +264,7 @@ const calculateAndDisplayScore = () => {
 }
 
 const init = () => {
+    getUsers()
     fillDomNumbers()
     evaluate()
     renderCurrentCalculation()
