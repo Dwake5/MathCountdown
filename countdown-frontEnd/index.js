@@ -1,9 +1,10 @@
 let highNumbers = [25, 50, 75, 100]
 let lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
 let numbers = []
+let used_numbers = []
 let round = 1
 let numbersToPick = 6 //5/6/7 for difficulty
-let timeLeft = 30
+let timeLeft = 300
 let calculation = []
 let operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
@@ -59,7 +60,7 @@ const addHighButtonFunctionality = () => {
         if (numbersToPick > 1) {
             pickHigh()
             numbersLeftToPick()
-            fillDomNumbers()
+            fillDomNumbers() // needed
         } else {
             pickHigh()
             startRound()
@@ -74,7 +75,7 @@ const addLowButtonFunctionality = () => {
         if (numbersToPick > 1) {
             pickLow()
             numbersLeftToPick()
-            fillDomNumbers()
+            fillDomNumbers() // needed
         } else {
             pickLow()
             startRound()
@@ -87,7 +88,7 @@ const addLowButtonFunctionality = () => {
 // Will then start the listeners else someone could start playing before then 
 const startRound = () => {
     numbersLeftToPick()
-    fillDomNumbers()
+    fillDomNumbers() // needed
     highBtn.style.display = "none"
     lowBtn.style.display = "none"
     pickDisplay.style.display = "none"
@@ -103,7 +104,7 @@ const numbersLeftToPick = () => {
 } 
 
 // Generate a random number between 101 and 999 
-const targetNumber = () => Math.floor(Math.random() * 20) + 10
+const targetNumber = () => Math.floor(Math.random() * 898) + 101
 
 // When high number is picked remove it from its array and place it in general numbers array
 const pickHigh = () => {
@@ -115,7 +116,6 @@ const pickHigh = () => {
         if (highNumbers.length === 0) {
             highBtn.disabled = true
             highBtn.innerText = 'No more left'
-            
         }
     }
 }
@@ -130,7 +130,7 @@ const pickLow = () => {
 
 // Only start listening to buttons once they are all filled
 const startListeners = () => {
-    addListenerToNumbers()
+    // addListenerToNumbers()
     addListenerToOperants()
     addListenToUndoBtn()
 }
@@ -139,8 +139,6 @@ const startListeners = () => {
 // Its better than the previous closest someone has got.
 const pushAndEvaluate = btn => {
     calculation.push(btn.innerText)
-        console.log('pushed to calc')
-        fillDomNumbers()
         renderCurrentCalculation()
         evaluate()
         evaluateClosest()
@@ -148,22 +146,32 @@ const pushAndEvaluate = btn => {
 
 // This takes in inputs from numb and operant listeners and evaluates it, its primary
 // Purpose is to avoid concatination of numbers
-const btnClickHandler = (btn, btnType) => {
-    if (calculation.length > 0) {
-        if (!isNaN(Number(calculation.slice(-1)))) {
-            if (operators.includes(btn.innerText)) {
-                pushAndEvaluate(btn)
-                console.log('Issue 1')
-            }
-        } else {
-            pushAndEvaluate(btn)
-            console.log('Issue 2')
-        }
-    } else {
-        pushAndEvaluate(btn)
-        console.log('Issue 3')
-    }
-}
+// const btnClickHandler = (btn, btnType) => {
+//     if (calculation.length > 0) { 
+//         // Got to here if calculation array is populated
+//         if (calculation.slice(-1) % 1 === 0) { 
+//             // Got to here if the last element of an array is a number
+//             if (operators.includes(btn.innerText)) {
+//                 // Got to here if the last btn clicked was an operator
+//                 console.log('Issue 1')
+//                 pushAndEvaluate(btn)
+//             } else {
+//                 console.log('Can not concatinate')
+//             }
+//         } else { 
+//             // Got to here if the last element in array is operator
+//             pushAndEvaluate(btn)
+//             console.log('Issue 2')
+//         }
+//     } else {
+//         // Got to here because its the first thing in array (and a number because its broke) therefore fine 
+//         pushAndEvaluate(btn)
+//         console.log('Issue 3')
+//     }
+    
+//     // btn.disabled = true
+//     console.log("why arent operators getting here?")
+// }
 
 // This function listens to the document for key press's
 const addListenToEscapeKey = () => {
@@ -177,19 +185,11 @@ const resetIfEscape = () => {
     }
 }
 
-// Attach listeners to numbers so they can be moved to calculation array
-const addListenerToNumbers = () => {
-    numbBtns = document.getElementsByClassName('movable')
-    for (let btn of numbBtns) {
-        btn.addEventListener('click', () => btnClickHandler(btn, 'number'))
-    }
-}
-
 // Attach listeners to operants so they can be moved to calculation array
 const addListenerToOperants = () => {
     operantBtns = document.getElementsByClassName('fixed')
     for (let btn of operantBtns) {
-        btn.addEventListener('click', () => btnClickHandler(btn, 'operants'))
+        btn.addEventListener('click', () => pushAndEvaluate(btn))
     }
 }
 
@@ -200,6 +200,7 @@ const evaluateClosest = () => {
         bestAnswer = yourAnswer
     }
     closest.innerText = `Best so far: ${bestAnswer}`
+    // If its solved perfectly, end round
     if (bestAnswer === goal) {
         timeLeft = 1 
     }
@@ -215,8 +216,7 @@ const timer = () => {
 const gameOver = () => {
     for (let btn of numbBtns) (btn.disabled = true)
     for (let btn of operantBtns) (btn.disabled = true)
-    calculateAndDisplayScore()
-    debugger
+    calculateAndDisplayScore() // Returns a round
     postScoreToServer(roundScore)
 }
 
@@ -239,8 +239,22 @@ const displayTargetNumber = () => {
 
 // Populate the DOM with numbers allocated
 const fillDomNumbers = () => {
-    for ( let i = 0; i < numbers.length; i++ ) {
-        numbHolder.children[i].innerHTML = numbers[i]
+    numbHolder.innerHTML = ''
+    for (const index in numbers) {
+        const number = numbers[index]
+        const numberBtn = document.createElement('button')
+        numberBtn.innerText = number
+        numberBtn.addEventListener('click', () => {
+            if (calculation[calculation.length - 1] % 1 !== 0) { 
+                numbers.splice(index, 1)
+                used_numbers.push(number)
+                fillDomNumbers()
+                calculation.push(number)
+                renderCurrentCalculation()
+                evaluateClosest()
+            }
+        })
+        numbHolder.append(numberBtn)
     }
 }
 
@@ -296,8 +310,22 @@ const displayGoalAndTimer = () => {
 const addListenToUndoBtn = () => {
     undoBtn = document.getElementById('undo')
     undoBtn.addEventListener('click', () => {
-        calculation.pop()
-        renderCurrentCalculation()
+        if (calculation.length > 0) {
+            if (calculation.slice(-1) % 1 === 0 ) {
+                // If last element in array is a number
+                console.log('got to here after undo button')
+                numbers.push(used_numbers.pop())
+                calculation.pop()
+                fillDomNumbers()
+                renderCurrentCalculation()
+                evaluate()
+            } else { // Last element is a operant
+                calculation.pop()
+                fillDomNumbers()
+                renderCurrentCalculation()
+                evaluate()
+            }
+        }
     })
 }
 
@@ -333,10 +361,9 @@ let gameReset = () => {
         highBtn.disabled = false
         highBtn.innerText = 'Pick a high number'
         operants = []
-        renderCurrentCalculation()
+        renderCurrentCalculation() //needed
         numbersLeftToPick()
         clearDomNumbers()
-        fillDomNumbers()
         clearInterval(intervalId)
         timeLeft = 60
         timerEl.innerText = '60 seconds left'
@@ -347,11 +374,9 @@ let gameReset = () => {
         closest.innerText = "Best so far:"
 }
 
-
 const init = () => {
     getUsers()
         .then(users => renderCurrentUsers(users))
-    fillDomNumbers()
     evaluate()
     renderCurrentCalculation()
     numbersLeftToPick()
@@ -365,7 +390,17 @@ init()
 
 // 1. How to get it so user cant concatinate numbers - done
 // 2. Sort out screen changes - work around
-// 3. How to get rounds working
+// 3. How to get rounds working 
 // 4. Get eval to not break when it isnt a legitimate sum // check if end is not okay
-// 4 Technically doesnt break but does put an error in the console
+// 4 - Technically doesnt break but does put an error in the console
+// 5. Add some more score based on how quickly they beat the game, if target met. 
 
+
+// Code thats probably doesnt need to be used again graveyard.
+// Attach listeners to numbers so they can be moved to calculation array
+// const addListenerToNumbers = () => {
+//     numbBtns = document.getElementsByClassName('movable')
+//     for (let btn of numbBtns) {
+//         btn.addEventListener('click', () => btnClickHandler(btn, 'number'))
+//     }
+// }
