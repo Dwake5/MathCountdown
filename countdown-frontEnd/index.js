@@ -2,8 +2,8 @@ let highNumbers = [25, 50, 75, 100]
 let lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
 let numbers = []
 let round = 1
-let numbersToPick = 2
-let timeLeft = 6000
+let numbersToPick = 6 //5/6/7 for difficulty
+let timeLeft = 60
 let calculation = []
 const operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
@@ -19,23 +19,25 @@ let finalScore = document.getElementById('score')
 let usersAndHighscores = document.getElementById('highscores')
 
 
-// fetch 
+// Fetch the users from the server 
 const getUsers = () => { 
     return fetch ("http://localhost:3000/users")
     .then(resp => resp.json())
-    .then(users => renderCurrentUsers(users))
 }
 
+// Plural function that sends each user from getUsers() to renderUser
 const renderCurrentUsers = users => {
     users.forEach(user => renderUser(user))
 }
 
+// Singular function that creates a P tag, adds the users name and score to it and then appends it to the page
 const renderUser = user => {
     pTag = document.createElement('p')
     pTag.innerText = `${user.name} : ${user.score}`
     usersAndHighscores.append(pTag)
 }
 
+// Logic for what to do when high button is clicked
 const addHighButtonFunctionality = () => {
     highBtn = document.getElementById('high')
     highBtn.addEventListener('click', () => {
@@ -50,6 +52,7 @@ const addHighButtonFunctionality = () => {
     })
 }
 
+// Logic for what to do when low button is clicked
 const addLowButtonFunctionality = () => {
     lowBtn = document.getElementById('low')
     lowBtn.addEventListener('click', () => {
@@ -64,6 +67,9 @@ const addLowButtonFunctionality = () => {
     })
 }
 
+// Once numbers to pick is 0, start the round will remove the low and high buttons
+// Remove the 'pick x more numbers to start', display the target and start the timer,
+// Will then start the listeners else someone could start playing before then 
 const startRound = () => {
     numbersLeftToPick()
     fillDomNumbers()
@@ -74,6 +80,7 @@ const startRound = () => {
     startListeners()
 }
 
+// Display how many numbers there are left to pick
 const numbersLeftToPick = () => {
     pickLeft = document.getElementById('toPick')
     pickLeft.innerText = `Pick ${numbersToPick} more numbers to start`
@@ -113,6 +120,8 @@ const startListeners = () => {
     addListenToUndoBtn()
 }
 
+// Push number/operant to calculation array, show the calculation, evaluate its some and check if 
+// Its better than the previous closest someone has got.
 const pushAndEvaluate = btn => {
     calculation.push(btn.innerText)
         fillDomNumbers()
@@ -121,6 +130,8 @@ const pushAndEvaluate = btn => {
         evaluateClosest()
 }
 
+// This takes in inputs from numb and operant listeners and evaluates it, its primary
+// Purpose is to avoid concatination of numbers
 const btnClickHandler = (btn, btnType) => {
     if (calculation.length > 0) {
         if (!isNaN(Number(calculation.slice(-1)))) {
@@ -135,7 +146,7 @@ const btnClickHandler = (btn, btnType) => {
     }
 }
 
-// Attach listeners to numberss so they can be moved to calculation array
+// Attach listeners to numbers so they can be moved to calculation array
 const addListenerToNumbers = () => {
     numbBtns = document.getElementsByClassName('movable')
     for (let btn of numbBtns) {
@@ -157,7 +168,7 @@ const evaluateClosest = () => {
     if (Math.abs(goal - yourAnswer) < diff) {
         bestAnswer = yourAnswer
     }
-    closest.innerText = `The closest you have got is ${bestAnswer}`
+    closest.innerText = `Best so far: ${bestAnswer}`
 }
 
 // Start a decreasing timer, updates the DOM and stops at 0
@@ -176,6 +187,7 @@ const timer = () => {
     setInterval(timeDown, 1000)
 }
 
+// Call a game over when the time is over (or optimal score reached) and run neccessary functions 
 const gameOver = () => {
     for (let btn of numbBtns) (btn.disabled = true)
     for (let btn of operantBtns) (btn.disabled = true)
@@ -237,6 +249,7 @@ const displayGoalAndTimer = () => {
     }
 }
 
+// Listen to the undo button, remove last element from array, and render calculation
 const addListenToUndoBtn = () => {
     undoBtn = document.getElementById('undo')
     undoBtn.addEventListener('click', () => {
@@ -245,6 +258,7 @@ const addListenToUndoBtn = () => {
     })
 }
 
+// Calculate score based on players performance. To do: Find a cleaner way to do this
 const calculateAndDisplayScore = () => {
     range = Math.abs(goal - bestAnswer)
     let score = 0
@@ -264,6 +278,7 @@ const calculateAndDisplayScore = () => {
 
 const init = () => {
     getUsers()
+        .then(users => renderCurrentUsers(users))
     fillDomNumbers()
     evaluate()
     renderCurrentCalculation()
@@ -272,11 +287,11 @@ const init = () => {
     addLowButtonFunctionality()
 }
 
-
 init()
 
-// 1. How to get it so user cant concatinate numbers
-// 2. Sort out screen changes
+// 1. How to get it so user cant concatinate numbers - done
+// 2. Sort out screen changes - work around
 // 3. How to get rounds working
 // 4. Get eval to not break when it isnt a legitimate sum // check if end is not okay
+// 4 Technically doesnt break but does put an error in the console
 
