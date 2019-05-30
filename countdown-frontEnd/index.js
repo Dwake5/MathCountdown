@@ -3,9 +3,9 @@ let lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
 let numbers = []
 let round = 1
 let numbersToPick = 6 //5/6/7 for difficulty
-let timeLeft = 60
+let timeLeft = 30
 let calculation = []
-const operators = ['+','-','*','/','(',')']
+let operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
 const clickableStationary = document.querySelectorAll('.fixed')
 // The numbers and operations you chose are displayed
@@ -15,9 +15,24 @@ const numbHolder = document.getElementById('numbers')
 // Display the closest someone has got to the answer
 const closest = document.getElementById('closest')
 let bestAnswer = 0
-let finalScore = document.getElementById('score')
-let usersAndHighscores = document.getElementById('highscores')
+const finalScore = document.getElementById('score')
+const usersAndHighscores = document.getElementById('highscores')
+const resetBtn = document.getElementById('reset')
+let timerEl = document.getElementById('time')
+let intervalId
+let pickDisplay = document.getElementById('toPick')
+let roundScore
 
+const timeDown = () => {
+    if (timeLeft !== 0) {
+        timeLeft--
+        timerEl.innerHTML = `${timeLeft} seconds left`
+    } else {
+        clearInterval(intervalId)
+        timerEl.innerHTML = `Times up`
+        gameOver()
+    }
+}
 
 // Fetch the users from the server 
 const getUsers = () => { 
@@ -73,9 +88,9 @@ const addLowButtonFunctionality = () => {
 const startRound = () => {
     numbersLeftToPick()
     fillDomNumbers()
-    highBtn.remove()
-    lowBtn.remove()
-    document.getElementById('toPick').remove()
+    highBtn.style.display = "none"
+    lowBtn.style.display = "none"
+    pickDisplay.style.display = "none"
     displayGoalAndTimer()
     startListeners()
 }
@@ -83,11 +98,12 @@ const startRound = () => {
 // Display how many numbers there are left to pick
 const numbersLeftToPick = () => {
     pickLeft = document.getElementById('toPick')
+  
     pickLeft.innerText = `Pick ${numbersToPick} more numbers to start`
 } 
 
 // Generate a random number between 101 and 999 
-const targetNumber = () => Math.floor(Math.random() * 898) + 101 
+const targetNumber = () => Math.floor(Math.random() * 20) + 10
 
 // When high number is picked remove it from its array and place it in general numbers array
 const pickHigh = () => {
@@ -97,7 +113,6 @@ const pickHigh = () => {
         highNumbers.splice(chosen, 1)
         numbersToPick--
         if (highNumbers.length === 0) {
-            console.log("here")
             highBtn.disabled = true
             highBtn.innerText = 'No more left'
             
@@ -124,6 +139,7 @@ const startListeners = () => {
 // Its better than the previous closest someone has got.
 const pushAndEvaluate = btn => {
     calculation.push(btn.innerText)
+        console.log('pushed to calc')
         fillDomNumbers()
         renderCurrentCalculation()
         evaluate()
@@ -137,12 +153,27 @@ const btnClickHandler = (btn, btnType) => {
         if (!isNaN(Number(calculation.slice(-1)))) {
             if (operators.includes(btn.innerText)) {
                 pushAndEvaluate(btn)
+                console.log('Issue 1')
             }
         } else {
             pushAndEvaluate(btn)
+            console.log('Issue 2')
         }
     } else {
         pushAndEvaluate(btn)
+        console.log('Issue 3')
+    }
+}
+
+// This function listens to the document for key press's
+const addListenToEscapeKey = () => {
+    document.addEventListener('keydown', resetIfEscape)
+}
+
+// This function will reset the game if the key pressed was escape
+const resetIfEscape = () => {
+    if (event.keyCode === 27) {
+        gameReset()
     }
 }
 
@@ -169,41 +200,53 @@ const evaluateClosest = () => {
         bestAnswer = yourAnswer
     }
     closest.innerText = `Best so far: ${bestAnswer}`
+    if (bestAnswer === goal) {
+        timeLeft = 1 
+    }
 }
 
 // Start a decreasing timer, updates the DOM and stops at 0
 const timer = () => {
-    let timer = document.getElementById('time')
-    const timeDown = () => {
-        if (timeLeft != 0) {
-            timeLeft--
-            timer.innerHTML = `${timeLeft} seconds left`
-        } else {
-            clearInterval()
-            timer.innerHTML = `Times up`
-            gameOver()
-        }
-    }
-    setInterval(timeDown, 1000)
+    intervalId = setInterval(timeDown, 1000)
 }
+
 
 // Call a game over when the time is over (or optimal score reached) and run neccessary functions 
 const gameOver = () => {
     for (let btn of numbBtns) (btn.disabled = true)
     for (let btn of operantBtns) (btn.disabled = true)
     calculateAndDisplayScore()
+    debugger
+    postScoreToServer(roundScore)
+}
+
+const postScoreToServer = score => {
+    const options = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({user: 'guest', score: score})
+    }
+    return fetch("http://localhost:3000/users", options).then(resp => resp.json())
 }
 
 // Update the DOM with randomly generated target number
 const displayTargetNumber = () => {
     goal = targetNumber()
-    target.innerHTML = `Your target number is ${goal}`
+    target.innerHTML = `Your target number is: ${goal}`
 }
 
 // Populate the DOM with numbers allocated
 const fillDomNumbers = () => {
     for ( let i = 0; i < numbers.length; i++ ) {
         numbHolder.children[i].innerHTML = numbers[i]
+    }
+}
+
+const clearDomNumbers = () => {
+    for ( let i = 0; i < clickableOnce.length; i++ ) {
+        numbHolder.children[i].innerHTML = ' '
     }
 }
 
@@ -261,20 +304,49 @@ const addListenToUndoBtn = () => {
 // Calculate score based on players performance. To do: Find a cleaner way to do this
 const calculateAndDisplayScore = () => {
     range = Math.abs(goal - bestAnswer)
-    let score = 0
+    roundScore = 0
     if (range === 0) {
-        score = 10
+        roundScore = 10
     } else if (range <= 2) {
-        score = 8
+        roundScore = 8
     } else if (range <= 5) {
-        score = 6
+        roundScore = 6
     } else if (range <= 10) {
-        score = 4
+        roundScore = 4
     } else if (range <= 20) {
-        score = 2
+        roundScore = 2
     } 
-    finalScore.innerText = `Your final score is ${score}`
+    finalScore.innerText = `Your final score is ${roundScore}`
+    return roundScore
 }
+
+const addListenerToResetBtn = () => {
+    resetBtn.addEventListener('click', gameReset)
+}
+
+let gameReset = () => {   
+        numbersToPick = 6
+        numbers = []
+        highNumbers = [25, 50, 75, 100]
+        lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
+        calculation = []
+        highBtn.disabled = false
+        highBtn.innerText = 'Pick a high number'
+        operants = []
+        renderCurrentCalculation()
+        numbersLeftToPick()
+        clearDomNumbers()
+        fillDomNumbers()
+        clearInterval(intervalId)
+        timeLeft = 60
+        timerEl.innerText = '60 seconds left'
+        pickDisplay.style.display = ""
+        highBtn.style.display = ""
+        lowBtn.style.display = ""
+        target.innerText = "Your target number is:"
+        closest.innerText = "Best so far:"
+}
+
 
 const init = () => {
     getUsers()
@@ -285,6 +357,8 @@ const init = () => {
     numbersLeftToPick()
     addHighButtonFunctionality()
     addLowButtonFunctionality()
+    addListenerToResetBtn()
+    addListenToEscapeKey()
 }
 
 init()
