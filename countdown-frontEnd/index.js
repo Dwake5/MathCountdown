@@ -4,7 +4,7 @@ let numbers = []
 let used_numbers = []
 let round = 1
 let numbersToPick = 6 //5/6/7 for difficulty
-let timeLeft = 300
+let timeLeft = 3
 let calculation = []
 let operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
@@ -83,6 +83,7 @@ const addLowButtonFunctionality = () => {
     })
 }
 
+
 // Once numbers to pick is 0, start the round will remove the low and high buttons
 // Remove the 'pick x more numbers to start', display the target and start the timer,
 // Will then start the listeners else someone could start playing before then 
@@ -130,7 +131,6 @@ const pickLow = () => {
 
 // Only start listening to buttons once they are all filled
 const startListeners = () => {
-    // addListenerToNumbers()
     addListenerToOperants()
     addListenToUndoBtn()
 }
@@ -139,39 +139,11 @@ const startListeners = () => {
 // Its better than the previous closest someone has got.
 const pushAndEvaluate = btn => {
     calculation.push(btn.innerText)
+    console.log('This has been called operatos push and eval')
         renderCurrentCalculation()
         evaluate()
         evaluateClosest()
 }
-
-// This takes in inputs from numb and operant listeners and evaluates it, its primary
-// Purpose is to avoid concatination of numbers
-// const btnClickHandler = (btn, btnType) => {
-//     if (calculation.length > 0) { 
-//         // Got to here if calculation array is populated
-//         if (calculation.slice(-1) % 1 === 0) { 
-//             // Got to here if the last element of an array is a number
-//             if (operators.includes(btn.innerText)) {
-//                 // Got to here if the last btn clicked was an operator
-//                 console.log('Issue 1')
-//                 pushAndEvaluate(btn)
-//             } else {
-//                 console.log('Can not concatinate')
-//             }
-//         } else { 
-//             // Got to here if the last element in array is operator
-//             pushAndEvaluate(btn)
-//             console.log('Issue 2')
-//         }
-//     } else {
-//         // Got to here because its the first thing in array (and a number because its broke) therefore fine 
-//         pushAndEvaluate(btn)
-//         console.log('Issue 3')
-//     }
-    
-//     // btn.disabled = true
-//     console.log("why arent operators getting here?")
-// }
 
 // This function listens to the document for key press's
 const addListenToEscapeKey = () => {
@@ -211,12 +183,15 @@ const timer = () => {
     intervalId = setInterval(timeDown, 1000)
 }
 
-
 // Call a game over when the time is over (or optimal score reached) and run neccessary functions 
 const gameOver = () => {
-    for (let btn of numbBtns) (btn.disabled = true)
+
+    Array.from(numbHolder.children).forEach(btn => {
+        btn.disabled = true
+    });
     for (let btn of operantBtns) (btn.disabled = true)
-    calculateAndDisplayScore() // Returns a round
+
+    calculateAndDisplayScore() // Returns a round score
     postScoreToServer(roundScore)
 }
 
@@ -360,12 +335,15 @@ let gameReset = () => {
         calculation = []
         highBtn.disabled = false
         highBtn.innerText = 'Pick a high number'
-        operants = []
         renderCurrentCalculation() //needed
         numbersLeftToPick()
         clearDomNumbers()
         clearInterval(intervalId)
-        timeLeft = 60
+        timeLeft = 30
+        Array.from(numbHolder.children).forEach(btn => {
+            btn.remove()
+        });
+        for (let btn of operantBtns) (btn.disabled = false)
         timerEl.innerText = '60 seconds left'
         pickDisplay.style.display = ""
         highBtn.style.display = ""
@@ -403,4 +381,33 @@ init()
 //     for (let btn of numbBtns) {
 //         btn.addEventListener('click', () => btnClickHandler(btn, 'number'))
 //     }
+// }
+
+// This takes in inputs from numb and operant listeners and evaluates it, its primary
+// Purpose is to avoid concatination of numbers
+// const btnClickHandler = (btn, btnType) => {
+//     if (calculation.length > 0) { 
+//         // Got to here if calculation array is populated
+//         if (calculation.slice(-1) % 1 === 0) { 
+//             // Got to here if the last element of an array is a number
+//             if (operators.includes(btn.innerText)) {
+//                 // Got to here if the last btn clicked was an operator
+//                 console.log('Issue 1')
+//                 pushAndEvaluate(btn)
+//             } else {
+//                 console.log('Can not concatinate')
+//             }
+//         } else { 
+//             // Got to here if the last element in array is operator
+//             pushAndEvaluate(btn)
+//             console.log('Issue 2')
+//         }
+//     } else {
+//         // Got to here because its the first thing in array (and a number because its broke) therefore fine 
+//         pushAndEvaluate(btn)
+//         console.log('Issue 3')
+//     }
+    
+//     // btn.disabled = true
+//     console.log("why arent operators getting here?")
 // }
