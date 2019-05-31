@@ -4,7 +4,7 @@ let numbers = []
 let used_numbers = []
 let round = 1
 let numbersToPick = 6 //5/6/7 for difficulty
-let timeLeft = 3
+let timeLeft = 60
 let calculation = []
 let operators = ['+','-','*','/','(',')']
 const clickableOnce = document.querySelectorAll('.movable')
@@ -23,6 +23,7 @@ let timerEl = document.getElementById('time')
 let intervalId
 let pickDisplay = document.getElementById('toPick')
 let roundScore
+operantBtns = document.getElementsByClassName('fixed')
 
 const timeDown = () => {
     if (timeLeft !== 0) {
@@ -62,6 +63,7 @@ const addHighButtonFunctionality = () => {
             numbersLeftToPick()
             fillDomNumbers() // needed
         } else {
+            removeListenFromOperators()
             pickHigh()
             startRound()
         }
@@ -77,12 +79,18 @@ const addLowButtonFunctionality = () => {
             numbersLeftToPick()
             fillDomNumbers() // needed
         } else {
+            removeListenFromOperators()
             pickLow()
             startRound()
         }
     })
 }
 
+const removeListenFromOperators = () => {
+    for (let btn of operantBtns) {
+        btn.removeEventListener('click', pushAndEvaluate)
+    }
+}
 
 // Once numbers to pick is 0, start the round will remove the low and high buttons
 // Remove the 'pick x more numbers to start', display the target and start the timer,
@@ -131,15 +139,15 @@ const pickLow = () => {
 
 // Only start listening to buttons once they are all filled
 const startListeners = () => {
+    removeListenFromOperators()
     addListenerToOperants()
     addListenToUndoBtn()
 }
 
 // Push number/operant to calculation array, show the calculation, evaluate its some and check if 
 // Its better than the previous closest someone has got.
-const pushAndEvaluate = btn => {
-    calculation.push(btn.innerText)
-    console.log('This has been called operatos push and eval')
+const pushAndEvaluate = event => {
+    calculation.push(event.target.innerText)
         renderCurrentCalculation()
         evaluate()
         evaluateClosest()
@@ -159,9 +167,8 @@ const resetIfEscape = () => {
 
 // Attach listeners to operants so they can be moved to calculation array
 const addListenerToOperants = () => {
-    operantBtns = document.getElementsByClassName('fixed')
     for (let btn of operantBtns) {
-        btn.addEventListener('click', () => pushAndEvaluate(btn))
+        btn.addEventListener('click', pushAndEvaluate)
     }
 }
 
@@ -195,6 +202,7 @@ const gameOver = () => {
     postScoreToServer(roundScore)
 }
 
+// Post score to server - currently not persisting
 const postScoreToServer = score => {
     const options = {
         method: 'POST',
@@ -219,6 +227,8 @@ const fillDomNumbers = () => {
         const number = numbers[index]
         const numberBtn = document.createElement('button')
         numberBtn.innerText = number
+        numberBtn.disabled = true
+        numberBtn.style.color = "black"
         numberBtn.addEventListener('click', () => {
             if (calculation[calculation.length - 1] % 1 !== 0) { 
                 numbers.splice(index, 1)
@@ -230,6 +240,9 @@ const fillDomNumbers = () => {
             }
         })
         numbHolder.append(numberBtn)
+        if ((used_numbers.length + numbers.length) > 5) {
+            numberBtn.disabled = false
+        }
     }
 }
 
@@ -328,28 +341,30 @@ const addListenerToResetBtn = () => {
 }
 
 let gameReset = () => {   
-        numbersToPick = 6
-        numbers = []
-        highNumbers = [25, 50, 75, 100]
-        lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
-        calculation = []
-        highBtn.disabled = false
-        highBtn.innerText = 'Pick a high number'
-        renderCurrentCalculation() //needed
-        numbersLeftToPick()
-        clearDomNumbers()
-        clearInterval(intervalId)
-        timeLeft = 30
-        Array.from(numbHolder.children).forEach(btn => {
-            btn.remove()
-        });
-        for (let btn of operantBtns) (btn.disabled = false)
-        timerEl.innerText = '60 seconds left'
-        pickDisplay.style.display = ""
-        highBtn.style.display = ""
-        lowBtn.style.display = ""
-        target.innerText = "Your target number is:"
-        closest.innerText = "Best so far:"
+    removeListenFromOperators()
+    numbersToPick = 6
+    numbers = []
+    used_numbers = []
+    highNumbers = [25, 50, 75, 100]
+    lowNumbers = [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
+    calculation = []
+    highBtn.disabled = false
+    highBtn.innerText = 'Pick a high number'
+    renderCurrentCalculation() //needed
+    numbersLeftToPick()
+    clearDomNumbers()
+    clearInterval(intervalId)
+    timeLeft = 30
+    Array.from(numbHolder.children).forEach(btn => {
+        btn.remove()
+    });
+    for (let btn of operantBtns) (btn.disabled = false)
+    timerEl.innerText = '60 seconds left'
+    pickDisplay.style.display = ""
+    highBtn.style.display = ""
+    lowBtn.style.display = ""
+    target.innerText = "Your target number is:"
+    closest.innerText = "Best so far:"
 }
 
 const init = () => {
