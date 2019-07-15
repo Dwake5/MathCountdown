@@ -1,4 +1,4 @@
-<h1> Countdown - mod3 project </h1> 
+<h1> Countdown - Mod3 Javascript Project </h1> 
 
 <p> This project was made during module 3 at Flatiron School. The project specs were to build something using
 javascript with a ruby backend. This was a solo project made in 4 days and presented to the office on the last day.</p>
