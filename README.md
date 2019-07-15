@@ -40,6 +40,6 @@ javascript with a ruby backend. This was a solo project made in 4 days and prese
 <h3> Stretch goals </h3>
 
 <p> CSS is not yet done, it is aimed to make it look like the gameshow. </p>
-<p> A button to allow the user to finishthe current round when they belive they have got the best score they can. <p>
+<p> A button to allow the user to finish the current round when they belive they have got the best score they can. <p>
 <p> Post score to the backend. </p>
-<p> A button to clear all there inputs. </p>
+<p> A button to clear all thier inputs. </p>
