@@ -1,7 +1,7 @@
 <h1> Countdown - Mod3 Javascript Project </h1> 
 
 <p> This project was made during module 3 at Flatiron School. The project specs were to build something using
-javascript with a ruby backend. This was a solo project made in 4 days and presented to the office on the last day.</p>
+vanilla JavaScript with a Rails backend. This was a solo project made in 4 days and presented to the office on the last day.</p>
 
 <p> This project is a recreation of the gameshow Countdown from TV, specifically the Math section. The game involves contestants picking 6 numbers from either low or high piles and then performing math operators on them to reach a randomly targeted number, within 30 seconds. </p>
 
